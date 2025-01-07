@@ -13,7 +13,7 @@ struct Manager<'a> {
     /// Command for adding one/multiple item
     add: &'a str,
     /// Whether multiple packages can be added at once
-    mulit_add: bool,
+    single_add: bool,
     /// Command for adding an item
     remove: &'a str,
     /// Command for getting a list of all installed items
