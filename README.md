@@ -10,3 +10,11 @@ Features i want to implement:
     - Modular
     - Different machines
   - No generation tracking, should be handled by git
+
+Managers i want to provide:
+  - Cargo
+  - Files
+  - Rustup component & toolchain
+  - Systemd services (normal & startup)
+  - Paru
+  - Patch
