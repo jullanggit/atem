@@ -8,6 +8,7 @@ struct Config<'a> {
 }
 
 #[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 struct Manager<'a> {
     /// Command for adding one/multiple item
     add: &'a str,
@@ -15,8 +16,10 @@ struct Manager<'a> {
     mulit_add: bool,
     /// Command for adding an item
     remove: &'a str,
+    /// Command for getting a list of all installed items
+    installed: &'a str,
     /// Command for upgrading all items
     upgrade: Option<&'a str>,
-    /// Command for getting a list of all installed items
-    installed: Option<&'a str>,
+    /// The items the manager is supposed to have
+    items: Vec<&'a str>,
 }
