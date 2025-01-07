@@ -5,6 +5,9 @@ use serde::Deserialize;
 struct Config<'a> {
     #[serde(borrow)]
     managers: Vec<Manager<'a>>,
+    /// Whether to first add then remove new packages
+    #[serde(default)]
+    add_first: bool,
 }
 
 #[derive(Deserialize)]
