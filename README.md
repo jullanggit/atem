@@ -41,5 +41,5 @@ files/
 ├── laptop/
 ├── pc/
 order.toml
-settings.toml (recommended for global options, altough they can be set everywhere)
+settings.toml (recommended for global options, although they can be set everywhere)
 ```
