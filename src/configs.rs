@@ -2,7 +2,7 @@ use std::{cell::LazyCell, collections::HashMap, fs, path::PathBuf};
 
 use serde::Deserialize;
 
-// I think this is fine
+// Its a LazyCell so from the view of any accessors it doesnt mutate
 #[expect(clippy::declare_interior_mutable_const)]
 const CONFIG_PATH: LazyCell<String> = LazyCell::new(|| {
     let home = std::env::var("HOME").expect("HOME is not set");
@@ -55,7 +55,9 @@ struct Manager {
     /// Command for adding an item
     remove: String,
     /// Command for getting a list of all installed items
-    installed: String,
+    list: String,
+    /// Command for checking which of the current configs items are actually installed
+    check: String,
     /// Command for upgrading all items
     upgrade: Option<String>,
     /// The items the manager is supposed to have
