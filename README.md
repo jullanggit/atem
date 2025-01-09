@@ -18,6 +18,7 @@ A meta package manager inspired by rebos
   - Systemd services (normal & startup)
   - Paru
   - Patch
+  - Copy (for stuff that doesnt like being a symlink)
 
 ## File structure
 ```
