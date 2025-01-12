@@ -20,15 +20,13 @@ const CONFIG_PATH: LazyCell<String> = LazyCell::new(|| {
 struct Manager {
     /// Command for adding one/multiple item
     add: String,
-    /// Whether multiple packages can be added at once
+    /// Whether add/remove can should be passed only one item per invocation
     #[serde(default)]
-    single_add: bool,
+    single_arg: bool,
     /// Command for adding an item
     remove: String,
-    /// Command for getting a list of all installed items
+    /// Command for getting a whitespace-separated list of all installed items
     list: String,
-    /// Command for checking which of the current configs items are actually installed
-    check: String,
     /// Command for upgrading all items
     upgrade: Option<String>,
     /// The items the manager is supposed to have

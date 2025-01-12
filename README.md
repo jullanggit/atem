@@ -4,7 +4,7 @@ A meta package manager inspired by rebos
   - Managers
     - User-defined
     - Ordering
-    - Current state dynamically determined by managers
+    - System state *always* dynamically determined by managers
     - Maybe user-defined additional options
   - Configs
     - Modular
