@@ -3,7 +3,13 @@
 #![expect(clippy::borrow_interior_mutable_const)]
 
 use serde::Deserialize;
-use std::{cell::LazyCell, collections::HashMap, fs, path::PathBuf};
+use std::{
+    cell::LazyCell,
+    collections::{HashMap, HashSet},
+    fs,
+    path::PathBuf,
+    process::{Command, exit},
+};
 use toml::Table;
 
 mod cli;
@@ -29,16 +35,73 @@ struct Manager {
     list: String,
     /// Command for upgrading all items
     upgrade: Option<String>,
+
     /// The items the manager is supposed to have
     #[serde(default)]
-    items: Vec<String>,
+    items: HashSet<String>,
+
+    /// The items to add to the system
+    #[serde(default)]
+    to_add: Vec<String>,
+    /// The items to remove from the system
+    #[serde(default)]
+    to_remove: Vec<String>,
 }
 
 fn main() {
     let mut managers = load_managers();
 
     load_configs(&mut managers);
+
+    compute_add_remove(managers);
 }
+
+/// Computes the items to add and remove for each manager
+fn compute_add_remove(managers: HashMap<String, Manager>) {
+    for (manager_name, mut manager) in managers {
+        // Get system items
+        let mut list_command_parts = manager.list.split_whitespace();
+        let program = list_command_parts
+            .next()
+            .expect("Command shouldnt be empty");
+
+        let output = Command::new(program).args(list_command_parts).output();
+
+        let system_items = match output {
+            Ok(output) => {
+                if output.status.success() {
+                    String::from_utf8(output.stdout).expect("Command output should be UTF-8")
+                } else {
+                    eprintln!(
+                        "Command 'list' for manager {manager_name} failed with error: \n{}",
+                        String::from_utf8_lossy(&output.stderr)
+                    );
+                    exit(1);
+                }
+            }
+            Err(e) => {
+                eprintln!("Failed to execute command 'list': {e}");
+                exit(1);
+            }
+        };
+
+        let system_items = system_items
+            .split_whitespace()
+            .map(str::to_string)
+            .collect();
+
+        manager.to_add = manager
+            .items
+            .difference(&system_items)
+            .map(Clone::clone)
+            .collect();
+        manager.to_remove = system_items
+            .difference(&manager.items)
+            .map(Clone::clone)
+            .collect();
+    }
+}
+
 fn load_managers() -> HashMap<String, Manager> {
     let manager_path = PathBuf::from(format!("{}/managers", *CONFIG_PATH));
 
@@ -64,6 +127,7 @@ fn load_managers() -> HashMap<String, Manager> {
         .collect()
 }
 
+/// Loads the config items for each manager
 fn load_configs(managers: &mut HashMap<String, Manager>) {
     // Start at the current machine's config file
     let hostname = hostname::get()
@@ -111,7 +175,7 @@ fn load_configs(managers: &mut HashMap<String, Manager>) {
                             .get_mut(&manager_name)
                             .expect("Manager should exist")
                             .items
-                            .push(item.into());
+                            .insert(item.into());
                     }
                 });
         }
