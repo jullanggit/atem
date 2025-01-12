@@ -37,11 +37,11 @@ struct Manager {
 }
 
 fn main() {
-    let mut managers = get_managers();
+    let mut managers = load_managers();
 
     load_configs(&mut managers);
 }
-fn get_managers() -> HashMap<String, Manager> {
+fn load_managers() -> HashMap<String, Manager> {
     let manager_path = PathBuf::from(format!("{}/managers", *CONFIG_PATH));
 
     manager_path
