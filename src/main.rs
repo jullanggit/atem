@@ -135,6 +135,8 @@ fn load_managers() -> HashMap<String, Manager> {
                 .file_name()
                 .to_str()
                 .expect("Failed to get manager name")
+                .strip_suffix(".toml")
+                .expect("File should be a toml")
                 .into();
 
             (name, manager)
@@ -151,12 +153,14 @@ fn load_configs(managers: &mut HashMap<String, Manager>) {
         .expect("Hostname should be valid UTF-8");
 
     // The list of configs that should be parsed, gets continually extended when a new config file is imported
-    // Paths are evaluated relative to CONFIG_PATH/configs/
-    let mut configs_to_parse: Vec<String> = vec![format!("../machines/{hostname}.toml")]; // A bit hacky, but should resolve to CONFIG_PATH/machines/{hostname}.toml
+    // Paths are evaluated relative to CONFIG_PATH/configs/ and are appended with .toml
+    let mut configs_to_parse: Vec<String> = vec![format!("../machines/{hostname}")]; // A bit hacky, but should resolve to CONFIG_PATH/machines/{hostname}.toml
 
     // Cant find a better way that allows pushing while iterating
     let mut i = 0;
     while let Some(config_file) = configs_to_parse.get(i) {
+        let config_file = format!("{}/configs/{config_file}.toml", *CONFIG_PATH);
+
         // Load the config file
         let config_string = fs::read_to_string(config_file).expect("Config file should exist");
 
