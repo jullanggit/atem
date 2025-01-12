@@ -103,14 +103,12 @@ fn compute_and_print_add_remove(managers: &mut HashMap<String, Manager>) {
 
         println!("{}:", manager_name.bold());
         for item_to_add in &manager.items_to_add {
-            let mut colored_string = item_to_add.bright_green();
-            colored_string.bgcolor = Some(Color::Green);
+            let colored_string = item_to_add.green();
 
             println!("{}", colored_string);
         }
         for item_to_remove in &manager.items_to_remove {
-            let mut colored_string = item_to_remove.bright_red();
-            colored_string.bgcolor = Some(Color::Red);
+            let colored_string = item_to_remove.red();
 
             println!("{}", colored_string);
         }
