@@ -3,7 +3,7 @@
 #![expect(clippy::borrow_interior_mutable_const)]
 
 use serde::Deserialize;
-use std::{cell::LazyCell, collections::HashMap, fs, path::PathBuf, process::exit};
+use std::{cell::LazyCell, collections::HashMap, fs, path::PathBuf};
 use toml::Table;
 
 mod cli;
@@ -39,41 +39,8 @@ struct Manager {
 fn main() {
     let mut managers = get_managers();
 
-    let configs_path = PathBuf::from(format!("{}/configs", *CONFIG_PATH));
-    configs_path
-        .read_dir()
-        .expect("Failed to read configs dir")
-        .for_each(|config_file| {
-            let config_file = config_file.unwrap();
-
-            let config_string =
-                fs::read_to_string(config_file.path()).expect("Failed to read config file");
-
-            let config_table: Table =
-                toml::from_str(&config_string).expect("Failed to deserialize config");
-
-            for (manager_name, value) in config_table {
-                let manager = managers
-                    .get_mut(&manager_name)
-                    .expect("Manager should exist");
-
-                if let Some(array) = value.as_array() {
-                    for item in array {
-                        manager
-                            .items
-                            .push(item.as_str().expect("Item should be a string").to_string());
-                    }
-                // We allow single-item entries
-                } else if let Some(item) = value.as_str() {
-                    manager.items.push(item.to_string());
-                } else {
-                    eprintln!("Items should be either a single string or an array of string");
-                    exit(1);
-                }
-            }
-        });
+    load_configs(&mut managers);
 }
-
 fn get_managers() -> HashMap<String, Manager> {
     let manager_path = PathBuf::from(format!("{}/managers", *CONFIG_PATH));
 
@@ -97,4 +64,60 @@ fn get_managers() -> HashMap<String, Manager> {
             (name, manager)
         })
         .collect()
+}
+
+fn load_configs(managers: &mut HashMap<String, Manager>) {
+    // Start at the current machine's config file
+    let hostname = hostname::get()
+        .expect("Failed to get hostname")
+        .into_string()
+        .expect("Hostname should be valid UTF-8");
+
+    // The list of configs that should be parsed, gets continually extended when a new config file is imported
+    // Paths are evaluated relative to CONFIG_PATH/configs/
+    let mut configs_to_parse: Vec<String> = vec![format!("../machines/{hostname}.toml")]; // A bit hacky, but should resolve to CONFIG_PATH/machines/{hostname}.toml
+
+    // Cant find a better way that allows pushing while iterating
+    let mut i = 0;
+    while let Some(config_file) = configs_to_parse.get(i) {
+        // Load the config file
+        let config_string = fs::read_to_string(config_file).expect("Config file should exist");
+
+        // Deserialize it
+        let config_table: Table =
+            toml::from_str(&config_string).expect("Failed to deserialize config");
+
+        for (manager_name, value) in config_table {
+            // Create an iterator over the items of the entry
+            value
+                // Both arrays...
+                .as_array()
+                .into_iter()
+                .flat_map(|vec| {
+                    vec.iter()
+                        .map(|value| value.as_str().expect("Item should be a string"))
+                })
+                // ...and single-value items are allowed
+                .chain(value.as_str().into_iter())
+                .for_each(|item| {
+                    // Didnt find a way to push this up without code duplication
+                    if manager_name == "imports" {
+                        let item = item.into();
+                        // Avoid infinite loop when two configs import each other
+                        if !configs_to_parse.contains(&item) {
+                            configs_to_parse.push(item);
+                        }
+                    } else {
+                        // Add the items to the manager
+                        managers
+                            .get_mut(&manager_name)
+                            .expect("Manager should exist")
+                            .items
+                            .push(item.into());
+                    }
+                });
+        }
+
+        i += 1;
+    }
 }
