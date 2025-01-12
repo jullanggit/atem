@@ -2,6 +2,7 @@
 // Look at the reasoning there for why this is ok
 #![expect(clippy::borrow_interior_mutable_const)]
 
+use colored::{Color, Colorize};
 use serde::Deserialize;
 use std::{
     cell::LazyCell,
@@ -42,10 +43,10 @@ struct Manager {
 
     /// The items to add to the system
     #[serde(default)]
-    to_add: Vec<String>,
+    items_to_add: Vec<String>,
     /// The items to remove from the system
     #[serde(default)]
-    to_remove: Vec<String>,
+    items_to_remove: Vec<String>,
 }
 
 fn main() {
@@ -53,12 +54,12 @@ fn main() {
 
     load_configs(&mut managers);
 
-    compute_add_remove(managers);
+    compute_and_print_add_remove(&mut managers);
 }
 
-/// Computes the items to add and remove for each manager
-fn compute_add_remove(managers: HashMap<String, Manager>) {
-    for (manager_name, mut manager) in managers {
+/// Computes and prints the items to add and remove for each manager
+fn compute_and_print_add_remove(managers: &mut HashMap<String, Manager>) {
+    for (manager_name, manager) in managers {
         // Get system items
         let mut list_command_parts = manager.list.split_whitespace();
         let program = list_command_parts
@@ -90,15 +91,29 @@ fn compute_add_remove(managers: HashMap<String, Manager>) {
             .map(str::to_string)
             .collect();
 
-        manager.to_add = manager
+        manager.items_to_add = manager
             .items
             .difference(&system_items)
             .map(Clone::clone)
             .collect();
-        manager.to_remove = system_items
+        manager.items_to_remove = system_items
             .difference(&manager.items)
             .map(Clone::clone)
             .collect();
+
+        println!("{}:", manager_name.bold());
+        for item_to_add in &manager.items_to_add {
+            let mut colored_string = item_to_add.bright_green();
+            colored_string.bgcolor = Some(Color::Green);
+
+            println!("{}", colored_string);
+        }
+        for item_to_remove in &manager.items_to_remove {
+            let mut colored_string = item_to_remove.bright_red();
+            colored_string.bgcolor = Some(Color::Red);
+
+            println!("{}", colored_string);
+        }
     }
 }
 
