@@ -61,12 +61,7 @@ fn main() {
 fn compute_and_print_add_remove(managers: &mut HashMap<String, Manager>) {
     for (manager_name, manager) in managers {
         // Get system items
-        let mut list_command_parts = manager.list.split_whitespace();
-        let program = list_command_parts
-            .next()
-            .expect("Command shouldnt be empty");
-
-        let output = Command::new(program).args(list_command_parts).output();
+        let output = Command::new("fish").arg("-c").arg(&manager.list).output(); // TODO: Add setting for which shell to use
 
         let system_items = match output {
             Ok(output) => {
