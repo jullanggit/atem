@@ -1,7 +1,10 @@
+#![feature(strict_overflow_ops)]
+
 use colored::Colorize;
 use serde::Deserialize;
 use std::{
     collections::{HashMap, HashSet},
+    env,
     ffi::OsStr,
     fs,
     path::PathBuf,
@@ -13,7 +16,7 @@ use toml::Table;
 mod cli;
 
 static CONFIG_PATH: LazyLock<String> = LazyLock::new(|| {
-    let home = std::env::var("HOME").expect("HOME is not set");
+    let home = env::var("HOME").expect("HOME is not set");
     format!("{home}/.config/meta")
 });
 
@@ -95,12 +98,12 @@ fn compute_and_print_add_remove(managers: &mut HashMap<String, Manager>) {
         for item_to_add in &manager.items_to_add {
             let colored_string = item_to_add.green();
 
-            println!("{}", colored_string);
+            println!("{colored_string}");
         }
         for item_to_remove in &manager.items_to_remove {
             let colored_string = item_to_remove.red();
 
-            println!("{}", colored_string);
+            println!("{colored_string}");
         }
     }
 }
@@ -187,6 +190,6 @@ fn load_configs(managers: &mut HashMap<String, Manager>) {
                 });
         }
 
-        i += 1;
+        i = i.strict_add(1); // i += 1
     }
 }
