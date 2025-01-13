@@ -1,24 +1,18 @@
-// Dont want to slap this on every function that uses CONFIG_PATH
-// Look at the reasoning there for why this is ok
-#![expect(clippy::borrow_interior_mutable_const)]
-
-use colored::{Color, Colorize};
+use colored::Colorize;
 use serde::Deserialize;
 use std::{
-    cell::LazyCell,
     collections::{HashMap, HashSet},
     ffi::OsStr,
     fs,
     path::PathBuf,
     process::{Command, exit},
+    sync::LazyLock,
 };
 use toml::Table;
 
 mod cli;
 
-// Its a LazyCell so from the view of any accessors it doesnt mutate
-#[expect(clippy::declare_interior_mutable_const)]
-const CONFIG_PATH: LazyCell<String> = LazyCell::new(|| {
+static CONFIG_PATH: LazyLock<String> = LazyLock::new(|| {
     let home = std::env::var("HOME").expect("HOME is not set");
     format!("{home}/.config/meta")
 });
