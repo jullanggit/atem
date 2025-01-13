@@ -7,6 +7,7 @@ use serde::Deserialize;
 use std::{
     cell::LazyCell,
     collections::{HashMap, HashSet},
+    ffi::OsStr,
     fs,
     path::PathBuf,
     process::{Command, exit},
@@ -116,9 +117,9 @@ fn load_managers() -> HashMap<String, Manager> {
     manager_path
         .read_dir()
         .expect("Failed to read manager dir")
+        .flatten() // Ignore Err() Results
+        .filter(|file| file.path().extension() == Some(OsStr::new("toml")))
         .map(|manager_file| {
-            let manager_file = manager_file.unwrap();
-
             let manager_string =
                 fs::read_to_string(manager_file.path()).expect("Failed to read manager file");
             let manager: Manager =
