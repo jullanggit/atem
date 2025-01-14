@@ -7,6 +7,7 @@ use std::{
     env,
     ffi::OsStr,
     fs,
+    io::stdin,
     path::PathBuf,
     process::{Command, exit},
     sync::LazyLock,
@@ -25,9 +26,6 @@ static CONFIG_PATH: LazyLock<String> = LazyLock::new(|| {
 struct Manager {
     /// Command for adding one/multiple item
     add: String,
-    /// Whether add/remove can should be passed only one item per invocation
-    #[serde(default)]
-    single_arg: bool,
     /// Command for adding an item
     remove: String,
     /// Command for getting a whitespace-separated list of all installed items
@@ -55,6 +53,62 @@ fn main() {
     compute_add_remove(&mut managers);
 
     print_diff(&managers);
+    if !ask_for_confirmation() {
+        return;
+    };
+
+    for manager in managers.values() {
+        // Add new items
+        fmt_run_command(&manager.add, &manager.items_to_add);
+        // Remove old items
+        fmt_run_command(&manager.remove, &manager.items_to_remove);
+    }
+}
+
+/// Takes a formatted command (containing <item> or <items>) and runs it with the provided items
+fn fmt_run_command(format_command: &str, items: &[String]) {
+    // Only add one item at a time
+    if format_command.contains("<item>") {
+        items
+            .iter()
+            .map(|item| format_command.replace("<item>", item))
+            .for_each(run_command);
+    // Add all items at once
+    } else if format_command.contains("<items>") {
+        let items = items.join(" "); // TODO: Maybe make the separator configurable
+        let command = format_command.replace("<items>", &items);
+        run_command(command);
+    } else {
+        eprintln!("Add command should contain either <item> or <items>");
+        exit(1);
+    };
+}
+
+fn run_command(command: String) {
+    let status = Command::new("fish")
+        .arg("-c")
+        .arg(command)
+        .status()
+        .expect("Failed to spawn child");
+
+    if !status.success() {
+        eprintln!("Command did not exit successfully");
+        exit(1);
+    }
+}
+
+/// Asks the user for confirmation. Returns the users answer
+fn ask_for_confirmation() -> bool {
+    println!("{}", "Continue?".bold());
+
+    let mut buf = String::new();
+
+    stdin().read_line(&mut buf).expect("Failed to get input");
+
+    match buf.trim() {
+        "y" | "Y" | "" => true, // newline is defaulted to y
+        _ => false,
+    }
 }
 
 /// Computes and prints the items to add and remove for each manager
