@@ -156,16 +156,15 @@ fn compute_add_remove(managers: &mut HashMap<String, Manager>) {
 /// Prints all items to remove/add
 fn print_diff(managers: &HashMap<String, Manager>) {
     for (manager_name, manager) in managers {
-        println!("{}:", manager_name.bold());
-        for item_to_add in &manager.items_to_add {
-            let colored_string = item_to_add.green();
-
-            println!("{colored_string}");
-        }
-        for item_to_remove in &manager.items_to_remove {
-            let colored_string = item_to_remove.red();
-
-            println!("{colored_string}");
+        // If are any items to add/remove
+        if !manager.items_to_add.is_empty() | !manager.items_to_remove.is_empty() {
+            println!("{}:", manager_name.bold());
+            for item_to_add in &manager.items_to_add {
+                println!("{}", item_to_add.green());
+            }
+            for item_to_remove in &manager.items_to_remove {
+                println!("{}", item_to_remove.red());
+            }
         }
     }
 }
