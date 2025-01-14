@@ -52,11 +52,13 @@ fn main() {
 
     load_configs(&mut managers);
 
-    compute_and_print_add_remove(&mut managers);
+    compute_add_remove(&mut managers);
+
+    print_diff(&managers);
 }
 
 /// Computes and prints the items to add and remove for each manager
-fn compute_and_print_add_remove(managers: &mut HashMap<String, Manager>) {
+fn compute_add_remove(managers: &mut HashMap<String, Manager>) {
     for (manager_name, manager) in managers {
         // Get system items
         let output = Command::new("fish").arg("-c").arg(&manager.list).output(); // TODO: Add setting for which shell to use
@@ -93,7 +95,11 @@ fn compute_and_print_add_remove(managers: &mut HashMap<String, Manager>) {
             .difference(&manager.items)
             .map(Clone::clone)
             .collect();
+    }
+}
 
+fn print_diff(managers: &HashMap<String, Manager>) {
+    for (manager_name, manager) in managers {
         println!("{}:", manager_name.bold());
         for item_to_add in &manager.items_to_add {
             let colored_string = item_to_add.green();
