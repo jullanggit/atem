@@ -57,23 +57,7 @@ fn main() {
         return;
     };
 
-    let manager_order = fs::read_to_string(format!("{}/manager_order", *CONFIG_PATH))
-        .expect("Failed to read manager order");
-    let ordered_managers = manager_order.lines();
-
-    if !ordered_managers.clone().count() == managers.len() {
-        eprintln!("Manager missing from manager_order"); // TODO: Maybe report which one
-        exit(1);
-    }
-
-    for manager in ordered_managers
-        .map(|manager_name| managers.get(manager_name).expect("Failed to get manager"))
-    {
-        // Add new items
-        fmt_run_command(&manager.add, &manager.items_to_add);
-        // Remove old items
-        fmt_run_command(&manager.remove, &manager.items_to_remove);
-    }
+    add_remove_items(&managers);
 }
 
 fn load_managers() -> HashMap<String, Manager> {
@@ -263,5 +247,27 @@ fn run_command(command: String) {
     if !status.success() {
         eprintln!("Command did not exit successfully");
         exit(1);
+    }
+}
+
+/// Adds/removes all items in `to_add`/`to_remove`.
+/// Respects `manager_order`
+fn add_remove_items(managers: &HashMap<String, Manager>) {
+    let manager_order = fs::read_to_string(format!("{}/manager_order", *CONFIG_PATH))
+        .expect("Failed to read manager order");
+    let ordered_managers = manager_order.lines();
+
+    if !ordered_managers.clone().count() == managers.len() {
+        eprintln!("Manager missing from manager_order"); // TODO: Maybe report which one
+        exit(1);
+    }
+
+    for manager in ordered_managers
+        .map(|manager_name| managers.get(manager_name).expect("Failed to get manager"))
+    {
+        // Add new items
+        fmt_run_command(&manager.add, &manager.items_to_add);
+        // Remove old items
+        fmt_run_command(&manager.remove, &manager.items_to_remove);
     }
 }
