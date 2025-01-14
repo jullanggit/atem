@@ -1,0 +1,1 @@
+- Use /etc/hostname for hostname
