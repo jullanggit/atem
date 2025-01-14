@@ -84,6 +84,7 @@ fn fmt_run_command(format_command: &str, items: &[String]) {
     };
 }
 
+/// Runs the given command using the shell
 fn run_command(command: String) {
     let status = Command::new("fish")
         .arg("-c")
@@ -152,6 +153,7 @@ fn compute_add_remove(managers: &mut HashMap<String, Manager>) {
     }
 }
 
+/// Prints all items to remove/add
 fn print_diff(managers: &HashMap<String, Manager>) {
     for (manager_name, manager) in managers {
         println!("{}:", manager_name.bold());
