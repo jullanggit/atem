@@ -6,6 +6,8 @@ description = "A meta package manager"
 repository = "https://github.com/jullanggit/meta"
 readme = "README.md"
 license = "MIT"
+categories = ["command-line-utilities", "config"]
+keywords = ["package-management"]
 
 [dependencies]
 clap = { version = "4.5.23", features = ["derive"] }
