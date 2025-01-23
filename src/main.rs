@@ -320,7 +320,9 @@ fn add_remove_items(managers: &HashMap<String, Manager>) {
 
         // Run operations
         for (format_command, items) in operations {
-            fmt_run_command(format_command, items, manager.items_separator.as_deref());
+            if !items.is_empty() {
+                fmt_run_command(format_command, items, manager.items_separator.as_deref());
+            }
         }
     }
 }
