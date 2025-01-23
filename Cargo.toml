@@ -13,7 +13,7 @@ keywords = ["package-management"]
 clap = { version = "4.5.23", features = ["derive"] }
 colored = "3.0.0"
 serde = { version = "1.0.217", features = ["derive"] }
-toml = "0.8.19"
+toml = { version = "0.8.19", default-features = false, features = ["parse"] }
 
 [lints.clippy]
 # Groups
