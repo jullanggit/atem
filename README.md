@@ -30,6 +30,7 @@ While this does increase the burden the individual managers have to bear, [all o
   - used for determining the system state
 ### Options
 - remove_then_add: first remove then add items
+- items_separator: The separator to use when filling in the <items> in format commands. Defaults to space
 ### Implemented Managers
 Can be found in [meta-managers](https://github.com/jullanggit/meta-managers)
 
