@@ -12,7 +12,6 @@ keywords = ["package-management"]
 [dependencies]
 clap = { version = "4.5.23", features = ["derive"] }
 colored = "3.0.0"
-paste = "1.0.15"
 serde = { version = "1.0.217", features = ["derive"] }
 toml = "0.8.19"
 

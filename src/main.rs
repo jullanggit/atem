@@ -9,7 +9,6 @@ use cli::{
     Commands::{Build, Diff, Upgrade},
 };
 use colored::Colorize as _;
-use paste::paste;
 use serde::Deserialize;
 use std::{
     collections::{HashMap, HashSet},
@@ -301,32 +300,22 @@ fn run_command(command: String) {
 /// Adds/removes all items in `to_add`/`to_remove`.
 /// Respects `manager_order`
 fn add_remove_items(managers: &HashMap<String, Manager>) {
-    macro_rules! add_remove {
-        ($action1:ident, $action2:ident, $manager:ident) => {
-            let items_1 = paste! {
-                &$manager.[<items_to_ $action1>]
-            };
-            if !items_1.is_empty() {
-                // Remove old items
-                fmt_run_command(&$manager.$action1, &items_1);
-            }
-            let items_2 = paste! {
-                &$manager.[<items_to_ $action2>]
-            };
-            if !items_2.is_empty() {
-                // Add new items
-                fmt_run_command(&$manager.$action2, &items_2);
-            }
-        };
-    }
-
     let ordered_managers = ordered_managers(managers);
 
     for manager in ordered_managers {
+        // Add & remove operations
+        let mut operations = [
+            (&manager.add, &manager.items_to_add),
+            (&manager.remove, &manager.items_to_remove),
+        ];
+        // Reverse operations if removing should be done first
         if manager.remove_then_add {
-            add_remove!(remove, add, manager);
-        } else {
-            add_remove!(add, remove, manager);
+            operations.reverse();
+        }
+
+        // Run operations
+        for (format_command, items) in operations {
+            fmt_run_command(format_command, items);
         }
     }
 }
