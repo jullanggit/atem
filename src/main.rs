@@ -1,4 +1,5 @@
 #![feature(strict_overflow_ops)]
+#![feature(concat_idents)]
 
 mod cli;
 
@@ -8,6 +9,7 @@ use cli::{
     Commands::{Build, Diff, Upgrade},
 };
 use colored::Colorize as _;
+use paste::paste;
 use serde::Deserialize;
 use std::{
     collections::{HashMap, HashSet},
@@ -37,6 +39,10 @@ struct Manager {
     list: String,
     /// Command for upgrading all items
     upgrade: Option<String>,
+
+    /// First remove items, then add them
+    #[serde(default)]
+    remove_then_add: bool,
 
     /// The items the manager is supposed to have
     #[serde(default)]
@@ -295,16 +301,32 @@ fn run_command(command: String) {
 /// Adds/removes all items in `to_add`/`to_remove`.
 /// Respects `manager_order`
 fn add_remove_items(managers: &HashMap<String, Manager>) {
+    macro_rules! add_remove {
+        ($action1:ident, $action2:ident, $manager:ident) => {
+            let items_1 = paste! {
+                &$manager.[<items_to_ $action1>]
+            };
+            if !items_1.is_empty() {
+                // Remove old items
+                fmt_run_command(&$manager.$action1, &items_1);
+            }
+            let items_2 = paste! {
+                &$manager.[<items_to_ $action2>]
+            };
+            if !items_2.is_empty() {
+                // Add new items
+                fmt_run_command(&$manager.$action2, &items_2);
+            }
+        };
+    }
+
     let ordered_managers = ordered_managers(managers);
 
     for manager in ordered_managers {
-        if manager.items_to_add.len() > 0 {
-            // Add new items
-            fmt_run_command(&manager.add, &manager.items_to_add);
-        }
-        if manager.items_to_remove.len() > 0 {
-            // Remove old items
-            fmt_run_command(&manager.remove, &manager.items_to_remove);
+        if manager.remove_then_add {
+            add_remove!(remove, add, manager);
+        } else {
+            add_remove!(add, remove, manager);
         }
     }
 }

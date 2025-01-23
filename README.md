@@ -28,6 +28,8 @@ While this does increase the burden the individual managers have to bear, [all o
 - upgrade: command for upgrading all items (does not receive any items for meta)
 - list: command for listing all installed items, separated by newlines
   - used for determining the system state
+### Options
+- remove_then_add: first remove then add items
 ### Implemented Managers
 Can be found in [meta-managers](https://github.com/jullanggit/meta-managers)
 
