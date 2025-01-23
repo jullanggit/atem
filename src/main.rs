@@ -215,10 +215,7 @@ fn compute_add_remove(managers: &mut HashMap<String, Manager>) {
             }
         };
 
-        let system_items = system_items
-            .split_whitespace()
-            .map(str::to_string)
-            .collect();
+        let system_items = system_items.split('\n').map(str::to_string).collect();
 
         manager.items_to_add = manager
             .items
