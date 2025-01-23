@@ -79,7 +79,6 @@ fn main() {
                     add_remove_items(&managers);
                 } else {
                     println!("Nothing to do.");
-                    return;
                 }
             }
         }
@@ -97,7 +96,7 @@ fn load_managers(managers_to_load: Option<Vec<String>>) -> HashMap<String, Manag
         .filter(|file| file.path().extension() == Some(OsStr::new("toml"))) // Only consider toml files
         // If --managers is given, only load the given managers
         .filter(|file| {
-            if let Some(managers) = &managers_to_load {
+            managers_to_load.as_ref().is_none_or(|managers| {
                 managers.contains(
                     &file
                         .file_name()
@@ -107,9 +106,7 @@ fn load_managers(managers_to_load: Option<Vec<String>>) -> HashMap<String, Manag
                         .expect("File should be a toml")
                         .into(),
                 )
-            } else {
-                true
-            }
+            })
         })
         .map(|manager_file| {
             let manager_string =
@@ -133,7 +130,7 @@ fn load_managers(managers_to_load: Option<Vec<String>>) -> HashMap<String, Manag
     assert!(
         managers_to_load
             .into_iter()
-            .flat_map(|vec| vec.into_iter())
+            .flat_map(IntoIterator::into_iter)
             .all(|manager_to_load| { managers.contains_key(&manager_to_load) }),
         "Requested Manager not found"
     );
