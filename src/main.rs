@@ -43,6 +43,10 @@ struct Manager {
     #[serde(default)]
     remove_then_add: bool,
 
+    /// The separator to use when filling in the <items> in format commands.
+    /// Defaults to space
+    items_separator: Option<String>,
+
     /// The items the manager is supposed to have
     #[serde(default)]
     items: HashSet<String>,
@@ -262,7 +266,7 @@ fn ask_for_confirmation() -> bool {
 }
 
 /// Takes a formatted command (containing <item> or <items>) and runs it with the provided items
-fn fmt_run_command(format_command: &str, items: &[String]) {
+fn fmt_run_command(format_command: &str, items: &[String], items_separator: Option<&str>) {
     // Only add one item at a time
     if format_command.contains("<item>") {
         items
@@ -271,7 +275,7 @@ fn fmt_run_command(format_command: &str, items: &[String]) {
             .for_each(run_command);
     // Add all items at once
     } else if format_command.contains("<items>") {
-        let items = items.join(" "); // TODO: Maybe make the separator configurable
+        let items = items.join(items_separator.unwrap_or(" "));
         let command = format_command.replace("<items>", &items);
         run_command(command);
     } else {
@@ -312,7 +316,7 @@ fn add_remove_items(managers: &HashMap<String, Manager>) {
 
         // Run operations
         for (format_command, items) in operations {
-            fmt_run_command(format_command, items);
+            fmt_run_command(format_command, items, manager.items_separator.as_deref());
         }
     }
 }
