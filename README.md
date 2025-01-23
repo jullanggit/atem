@@ -18,19 +18,34 @@ While this does increase the burden the individual managers have to bear, [all o
     - Different machines
   - No generation tracking, should be handled by git
 
-## Managers to implement (not yet in [meta-managers](https://github.com/jullanggit/meta-managers))
-  - Patch
-  - Copy (for stuff that doesnt like being a symlink)
+## Managers
+- Each manager is a file in the managers/ subdirectory
+- The ordering of the managers is defined in `manager_order`
+### Commands
+- add: command for adding one or multiple items
+  - <item> will be replaced by a single item, <items> by all of them, separated by spaces
+- remove: command for removing one or multiple items (same formatting as above)
+- upgrade: command for upgrading all items (does not receive any items for meta)
+- list: command for listing all installed items, separated by newlines
+  - used for determining the system state
+### Implemented Managers
+Can be found in [meta-managers](https://github.com/jullanggit/meta-managers)
+
+## Configs
+- Each machine has a "root" config file, found at machines/{machine name}.toml
+- Further config files are located in the configs/ subdirectory, and can be imported by file name using `imports = ["foo", "bar"]`
+- These config files can also import other config files
+- Specifying items is done by using `{manager name} = ["foo", "bar"]` in any config file
+- All arrays can also be replaced by single-item strings
 
 ## File structure
 ```
 configs/
-└── config.toml
+├── common.toml
+└── rust.toml
 machines/
-├── laptop/
-│   └── config.toml
-└── pc/
-    └── config.toml
+├── laptop.toml
+└── pc.toml
 managers/
 ├── cargo.toml
 ├── files.toml
@@ -44,5 +59,4 @@ files/
 ├── laptop/
 ├── pc/
 manager_order
-settings.toml
 ```
