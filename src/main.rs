@@ -18,15 +18,8 @@ use std::{
     io::stdin,
     path::PathBuf,
     process::{Command, exit},
-    sync::LazyLock,
 };
 use toml::Table;
-
-#[expect(clippy::expect_used)]
-static CONFIG_PATH: LazyLock<String> = LazyLock::new(|| {
-    let home = env::var("HOME").expect("HOME is not set");
-    format!("{home}/.config/meta")
-});
 
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -99,7 +92,7 @@ fn load_managers(
     managers_to_load: Option<Vec<String>>,
     non_specified: bool,
 ) -> anyhow::Result<Vec<Manager>> {
-    let manager_path = PathBuf::from(format!("{}/managers", *CONFIG_PATH));
+    let manager_path = PathBuf::from(format!("{}/managers", config_path()?));
 
     let mut managers = manager_path
         .read_dir()
@@ -136,11 +129,12 @@ fn load_managers(
         })
         .collect::<anyhow::Result<Vec<_>>>()?;
 
-    let manager_order: Vec<String> = fs::read_to_string(format!("{}/manager_order", *CONFIG_PATH))
-        .context("Failed to read manager order")?
-        .lines()
-        .map(ToOwned::to_owned)
-        .collect();
+    let manager_order: Vec<String> =
+        fs::read_to_string(format!("{}/manager_order", config_path()?))
+            .context("Failed to read manager order")?
+            .lines()
+            .map(ToOwned::to_owned)
+            .collect();
 
     managers.sort_unstable_by_key(|manager| {
         manager_order
@@ -170,13 +164,13 @@ fn load_configs(managers: &mut [Manager]) -> anyhow::Result<()> {
     let hostname = hostname.trim();
 
     // The list of configs that should be parsed, gets continually extended when a new config file is imported
-    // Paths are evaluated relative to CONFIG_PATH/configs/ and are appended with .toml
-    let mut configs_to_parse: Vec<String> = vec![format!("../machines/{hostname}")]; // A bit hacky, but should resolve to CONFIG_PATH/machines/{hostname}.toml
+    // Paths are evaluated relative to config_path()/configs/ and are appended with .toml
+    let mut configs_to_parse: Vec<String> = vec![format!("../machines/{hostname}")]; // A bit hacky, but should resolve to config_path()/machines/{hostname}.toml
 
     // Cant find a better way that allows pushing while iterating
     let mut i = 0;
     while let Some(config_file) = configs_to_parse.get(i) {
-        let config_file = format!("{}/configs/{config_file}.toml", *CONFIG_PATH);
+        let config_file = format!("{}/configs/{config_file}.toml", config_path()?);
 
         // Load the config file
         let config_string = fs::read_to_string(config_file)
@@ -385,4 +379,12 @@ fn upgrade(managers: &[Manager]) -> anyhow::Result<()> {
         }
     }
     Ok(())
+}
+
+fn config_path() -> anyhow::Result<String> {
+    let home = env::var("HOME")
+        .context("HOME is not set")
+        // Doing this here instead of at every call site (maybe theres a better way to do this)
+        .context("Failed to get config path")?;
+    Ok(format!("{home}/.config/meta"))
 }
