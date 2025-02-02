@@ -145,11 +145,11 @@ fn load_managers(managers_to_load: Option<Vec<String>>) -> anyhow::Result<Vec<Ma
     // Assert that all requested managers were found
     if let Some(managers_to_load) = managers_to_load {
         for manager_to_load in managers_to_load {
-            if managers
+            if !managers
                 .iter()
                 .any(|manager| manager.name == manager_to_load)
             {
-                return Err(anyhow!("Requested Manager not found"));
+                return Err(anyhow!("Requested Manager '{manager_to_load}' not found"));
             }
         }
     }
