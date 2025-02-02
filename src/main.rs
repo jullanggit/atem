@@ -1,5 +1,6 @@
 #![feature(strict_overflow_ops)]
 #![feature(iterator_try_collect)]
+#![feature(let_chains)]
 
 mod cli;
 
@@ -64,7 +65,8 @@ struct Manager {
 fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
-    let mut managers = load_managers(cli.managers).context("Failed to load managers")?;
+    let mut managers =
+        load_managers(cli.managers, cli.non_specified).context("Failed to load managers")?;
     match cli.command {
         Build | Diff => {
             load_configs(&mut managers).context("Failed to load configs")?;
@@ -81,7 +83,7 @@ fn main() -> anyhow::Result<()> {
                     // Ask for confirmation
                     if !ask_for_confirmation().context("Failed to ask for confirmation")? {
                         exit(1);
-                    };
+                    }
                     add_remove_items(&managers).context("Failed to add/remove items")?;
                 } else {
                     println!("Nothing to do.");
@@ -93,7 +95,10 @@ fn main() -> anyhow::Result<()> {
     }
 }
 
-fn load_managers(managers_to_load: Option<Vec<String>>) -> anyhow::Result<Vec<Manager>> {
+fn load_managers(
+    managers_to_load: Option<Vec<String>>,
+    non_specified: bool,
+) -> anyhow::Result<Vec<Manager>> {
     let manager_path = PathBuf::from(format!("{}/managers", *CONFIG_PATH));
 
     let mut managers = manager_path
@@ -114,7 +119,8 @@ fn load_managers(managers_to_load: Option<Vec<String>>) -> anyhow::Result<Vec<Ma
             |(_, name)| {
                 managers_to_load
                     .as_ref()
-                    .is_none_or(|managers| managers.contains(name))
+                    // If non_specified, filter out managers that are specified, else filter out ones that aren't
+                    .is_none_or(|managers_to_load| managers_to_load.contains(name) != non_specified)
             },
         )
         // Load manager
@@ -142,8 +148,8 @@ fn load_managers(managers_to_load: Option<Vec<String>>) -> anyhow::Result<Vec<Ma
             .position(|ordered_manager| *ordered_manager == manager.name)
     });
 
-    // Assert that all requested managers were found
-    if let Some(managers_to_load) = managers_to_load {
+    // Assert that all specified managers were found
+    if !non_specified && let Some(managers_to_load) = managers_to_load {
         for manager_to_load in managers_to_load {
             if !managers
                 .iter()

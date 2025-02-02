@@ -7,6 +7,9 @@ pub struct Cli {
     #[arg(long, short)]
     /// The managers to run the command for
     pub managers: Option<Vec<String>>,
+    #[arg(long, short)]
+    /// Run all non-specified managers
+    pub non_specified: bool,
     #[command(subcommand)]
     pub command: Commands,
 }
