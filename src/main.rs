@@ -1,6 +1,7 @@
 #![feature(strict_overflow_ops)]
 #![feature(iterator_try_collect)]
 #![feature(let_chains)]
+#![feature(iter_intersperse)]
 
 mod cli;
 
@@ -302,20 +303,20 @@ fn ask_for_confirmation() -> anyhow::Result<bool> {
 }
 
 /// Takes a format command (containing <item> or <items>) and runs it with the provided items
-fn fmt_run_command(
+fn fmt_run_command<'a, 'b: 'a>(
     format_command: &str,
-    items: &[String],
-    items_separator: &str,
+    items: impl IntoIterator<Item = &'a str>,
+    items_separator: &'b str,
 ) -> anyhow::Result<()> {
     // Only add one item at a time
     if format_command.contains("<item>") {
         items
-            .iter()
+            .into_iter()
             .map(|item| format_command.replace("<item>", item))
             .try_for_each(run_command)
     // Add all items at once
     } else if format_command.contains("<items>") {
-        let items = items.join(items_separator);
+        let items: String = items.into_iter().intersperse(items_separator).collect();
         let command = format_command.replace("<items>", &items);
         run_command(command)
     } else {
@@ -362,8 +363,12 @@ fn add_remove_items(managers: &[Manager]) -> anyhow::Result<()> {
         for (format_command, items) in operations {
             if !items.is_empty() {
                 let items_separator = manager.items_separator.as_deref().unwrap_or(" ");
-                fmt_run_command(format_command, items, items_separator)
-                    .with_context(|| format!("Failed to run fmt command '{format_command}'"))?;
+                fmt_run_command(
+                    format_command,
+                    items.iter().map(String::as_str),
+                    items_separator,
+                )
+                .with_context(|| format!("Failed to run fmt command '{format_command}'"))?;
             }
         }
     }
