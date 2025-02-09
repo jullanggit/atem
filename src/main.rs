@@ -307,22 +307,29 @@ fn fmt_run_command<'a, 'b: 'a>(
     format_command: &str,
     items: impl IntoIterator<Item = &'a str>,
     items_separator: &'b str,
+    allow_no_fmt: bool,
 ) -> anyhow::Result<()> {
-    // Only add one item at a time
-    if format_command.contains("<item>") {
-        items
+    match (
+        format_command.contains("<item>"),
+        format_command.contains("<items>"),
+        allow_no_fmt,
+    ) {
+        // Only add one item at a time
+        (true, false, _) => items
             .into_iter()
             .map(|item| format_command.replace("<item>", item))
-            .try_for_each(run_command)
-    // Add all items at once
-    } else if format_command.contains("<items>") {
-        let items: String = items.into_iter().intersperse(items_separator).collect();
-        let command = format_command.replace("<items>", &items);
-        run_command(command)
-    } else {
-        Err(anyhow!(
-            "Add command should contain either <item> or <items>"
-        ))
+            .try_for_each(run_command),
+        // Add all items at once
+        (false, true, _) => {
+            let items: String = items.into_iter().intersperse(items_separator).collect();
+            let command = format_command.replace("<items>", &items);
+            run_command(command)
+        }
+        (false, false, true) => run_command(format_command),
+        (true, true, _) => Err(anyhow!("Fmt command contains both <item> and <items>")),
+        (false, false, false) => Err(anyhow!(
+            "Fmt command should contain either <item> or <items>"
+        )),
     }
 }
 
@@ -367,6 +374,7 @@ fn add_remove_items(managers: &[Manager]) -> anyhow::Result<()> {
                     format_command,
                     items.iter().map(String::as_str),
                     items_separator,
+                    false,
                 )
                 .with_context(|| format!("Failed to run fmt command '{format_command}'"))?;
             }
