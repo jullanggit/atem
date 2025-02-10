@@ -11,7 +11,7 @@ While this does increase the burden the individual managers have to bear, [all o
   - Managers
     - User-defined
     - Ordering
-    - System state *always* dynamically determined by managers
+    - System state dynamically determined by managers
     - Maybe user-defined additional options
   - Configs
     - Modular
@@ -25,9 +25,11 @@ While this does increase the burden the individual managers have to bear, [all o
 - add: command for adding one or multiple items
   - <item> will be replaced by a single item, <items> by all of them, separated by spaces
 - remove: command for removing one or multiple items (same formatting as above)
-- upgrade: command for upgrading all items (does not receive any items for meta)
 - list: command for listing all installed items, separated by newlines
+  - can also use the same formatting as above
+    - command will be passed all items in the configuration
   - used for determining the system state
+- upgrade: command for upgrading all items (does not receive any items from meta)
 ### Options
 - remove_then_add: first remove then add items
 - items_separator: The separator to use when filling in the <items> in format commands. Defaults to space
