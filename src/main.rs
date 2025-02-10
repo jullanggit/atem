@@ -227,13 +227,15 @@ fn compute_add_remove(managers: &mut [Manager]) -> anyhow::Result<()> {
     for manager in managers {
         // Get system items
         let items_separator = manager.items_separator.as_deref().unwrap_or(" ");
-        let outputs = fmt_run_command(
+        let outputs: Vec<String> = fmt_command(
             &manager.list,
             manager.items.iter().map(String::as_str),
             items_separator,
             true,
-            run_command_with_output,
-        )?;
+        )?
+        .into_iter()
+        .map(run_command_with_output)
+        .try_collect()?;
 
         // Cant get this to work without collecting first
         let system_items_string: String =
@@ -293,37 +295,30 @@ fn ask_for_confirmation() -> anyhow::Result<bool> {
     }
 }
 
-/// Takes a format command (containing <item> or <items>) and runs it with the provided items
+/// Takes a format command (containing <item> or <items>) and formats it with the given items
 // This function is getting a bit too multipurpose, but its fine for the moment
-fn fmt_run_command<'a, 'b: 'a, It, F, O>(
+fn fmt_command<'a, 'b: 'a>(
     format_command: &str,
-    items: It,
+    items: impl IntoIterator<Item = &'a str>,
     items_separator: &'b str,
     allow_no_fmt: bool,
-    run_fn: F,
-) -> anyhow::Result<Vec<O>>
-where
-    It: IntoIterator<Item = &'a str>,
-    F: Fn(String) -> anyhow::Result<O>,
-{
+) -> anyhow::Result<Vec<String>> {
     match (
         format_command.contains("<item>"),
         format_command.contains("<items>"),
         allow_no_fmt,
     ) {
         // Only add one item at a time
-        (true, false, _) => items
+        (true, false, _) => Ok(items
             .into_iter()
             .map(|item| format_command.replace("<item>", item))
-            .map(run_fn)
-            .collect(),
+            .collect()),
         // Add all items at once
         (false, true, _) => {
             let items: String = items.into_iter().intersperse(items_separator).collect();
-            let command = format_command.replace("<items>", &items);
-            run_fn(command).map(|output| vec![output])
+            Ok(vec![format_command.replace("<items>", &items)])
         }
-        (false, false, true) => run_fn(format_command.to_owned()).map(|output| vec![output]),
+        (false, false, true) => Ok(vec![format_command.into()]),
         (true, true, _) => Err(anyhow!("Fmt command contains both <item> and <items>")),
         (false, false, false) => Err(anyhow!(
             "Fmt command should contain either <item> or <items>"
@@ -388,13 +383,14 @@ fn add_remove_items(managers: &[Manager]) -> anyhow::Result<()> {
         for (format_command, items) in operations {
             if !items.is_empty() {
                 let items_separator = manager.items_separator.as_deref().unwrap_or(" ");
-                fmt_run_command(
+                fmt_command(
                     format_command,
                     items.iter().map(String::as_str),
                     items_separator,
                     false,
-                    run_command,
-                )
+                )?
+                .into_iter()
+                .try_for_each(run_command)
                 .with_context(|| format!("Failed to run fmt command '{format_command}'"))?;
             }
         }
