@@ -226,29 +226,20 @@ fn load_configs(managers: &mut [Manager]) -> anyhow::Result<()> {
 fn compute_add_remove(managers: &mut [Manager]) -> anyhow::Result<()> {
     for manager in managers {
         // Get system items
-        let output = Command::new("fish") // TODO: Add setting for which shell to use
-            .arg("-c")
-            .arg(&manager.list)
-            .output()
-            .with_context(|| {
-                format!(
-                    "Failed to execute command 'list' for manager '{}'",
-                    manager.name
-                )
-            })?;
+        let items_separator = manager.items_separator.as_deref().unwrap_or(" ");
+        let outputs = fmt_run_command(
+            &manager.list,
+            manager.items.iter().map(String::as_str),
+            items_separator,
+            true,
+            run_command_with_output,
+        )?;
 
-        let system_items = if output.status.success() {
-            String::from_utf8(output.stdout)
-                .context("Failed to convert command output to String")?
-        } else {
-            return Err(anyhow!(format!(
-                "Command 'list' for manager '{}' failed with stderr: \n{}",
-                manager.name,
-                String::from_utf8_lossy(&output.stderr)
-            )));
-        };
+        // Cant get this to work without collecting first
+        let system_items_string: String =
+            outputs.into_iter().intersperse("\n".to_owned()).collect();
 
-        let system_items = system_items
+        let system_items = system_items_string
             .split('\n')
             .filter(|item| !item.is_empty())
             .map(str::to_string)
@@ -303,12 +294,18 @@ fn ask_for_confirmation() -> anyhow::Result<bool> {
 }
 
 /// Takes a format command (containing <item> or <items>) and runs it with the provided items
-fn fmt_run_command<'a, 'b: 'a>(
+// This function is getting a bit too multipurpose, but its fine for the moment
+fn fmt_run_command<'a, 'b: 'a, It, F, O>(
     format_command: &str,
-    items: impl IntoIterator<Item = &'a str>,
+    items: It,
     items_separator: &'b str,
     allow_no_fmt: bool,
-) -> anyhow::Result<()> {
+    run_fn: F,
+) -> anyhow::Result<Vec<O>>
+where
+    It: IntoIterator<Item = &'a str>,
+    F: Fn(String) -> anyhow::Result<O>,
+{
     match (
         format_command.contains("<item>"),
         format_command.contains("<items>"),
@@ -318,14 +315,15 @@ fn fmt_run_command<'a, 'b: 'a>(
         (true, false, _) => items
             .into_iter()
             .map(|item| format_command.replace("<item>", item))
-            .try_for_each(run_command),
+            .map(run_fn)
+            .collect(),
         // Add all items at once
         (false, true, _) => {
             let items: String = items.into_iter().intersperse(items_separator).collect();
             let command = format_command.replace("<items>", &items);
-            run_command(command)
+            run_fn(command).map(|output| vec![output])
         }
-        (false, false, true) => run_command(format_command),
+        (false, false, true) => run_fn(format_command.to_owned()).map(|output| vec![output]),
         (true, true, _) => Err(anyhow!("Fmt command contains both <item> and <items>")),
         (false, false, false) => Err(anyhow!(
             "Fmt command should contain either <item> or <items>"
@@ -348,6 +346,26 @@ fn run_command(command: impl AsRef<str>) -> anyhow::Result<()> {
     } else {
         Err(anyhow!(format!(
             "Command '{command}' did not exit successfully"
+        )))
+    }
+}
+
+/// Runs the given command using the shell and collects its output
+fn run_command_with_output(command: impl AsRef<str>) -> anyhow::Result<String> {
+    let command = command.as_ref();
+
+    let output = Command::new("fish")
+        .arg("-c")
+        .arg(command)
+        .output()
+        .with_context(|| format!("Failed to spawn child command '{command}'"))?;
+
+    if output.status.success() {
+        Ok(String::from_utf8(output.stdout)?)
+    } else {
+        Err(anyhow!(format!(
+            "Command '{command}' failed with stderr: \n{}",
+            String::from_utf8_lossy(&output.stderr)
         )))
     }
 }
@@ -375,6 +393,7 @@ fn add_remove_items(managers: &[Manager]) -> anyhow::Result<()> {
                     items.iter().map(String::as_str),
                     items_separator,
                     false,
+                    run_command,
                 )
                 .with_context(|| format!("Failed to run fmt command '{format_command}'"))?;
             }
