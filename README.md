@@ -70,6 +70,8 @@ Can be found in [atem-managers](https://github.com/jullanggit/atem-managers)
 └── manager_order
 ```
 
+## Installing
+`cargo +nightly install atem`
 
 ## Usage
 ```
