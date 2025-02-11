@@ -7,7 +7,7 @@ repository = "https://github.com/jullanggit/atem"
 readme = "README.md"
 license = "MIT"
 categories = ["command-line-utilities", "config"]
-keywords = ["package-management"]
+keywords = ["package-manager, linux-distro, system, repeatability"]
 
 [dependencies]
 anyhow = "1.0.95"
