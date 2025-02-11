@@ -414,5 +414,5 @@ fn config_path() -> anyhow::Result<String> {
         .context("HOME is not set")
         // Doing this here instead of at every call site (maybe theres a better way to do this)
         .context("Failed to get config path")?;
-    Ok(format!("{home}/.config/meta"))
+    Ok(format!("{home}/.config/atem"))
 }

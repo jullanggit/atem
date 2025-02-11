@@ -1,9 +1,9 @@
 [package]
-name = "meta"
+name = "atem"
 version = "0.1.0"
 edition = "2024"
 description = "A meta package manager"
-repository = "https://github.com/jullanggit/meta"
+repository = "https://github.com/jullanggit/atem"
 readme = "README.md"
 license = "MIT"
 categories = ["command-line-utilities", "config"]
