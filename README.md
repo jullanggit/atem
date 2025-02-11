@@ -6,7 +6,11 @@ Atem has no generation tracking. Instead system state is determined using each m
 This solves one of the main problems I've had when using rebos: the 'built' generation and the actual system getting out of sync.
 While this does increase the burden the individual managers have to bear, [all of the ones I personally use](https://github.com/jullanggit/atem-managers) already have a built-in way to get their items
 
-## Features i want to implement:
+## Naming
+- Meta backwards is atem
+- Also atem is breath in german, and i like the idea that it breathes life into your system
+
+## Features
   - Managers
     - User-defined
     - Ordering
@@ -66,6 +70,20 @@ Can be found in [atem-managers](https://github.com/jullanggit/atem-managers)
 └── manager_order
 ```
 
-## Naming
-- Meta backwards is atem
-- Also atem is breath in german, and i like the idea that it breathes life into your system
+
+## Usage
+```
+Usage: atem [OPTIONS] <COMMAND>
+
+Commands:
+  build    Build the current configuration
+  diff     Print the difference between the system and the config
+  upgrade  Upgrade all managers
+  help     Print this message or the help of the given subcommand(s)
+
+Options:
+  -m, --managers <MANAGERS>  The managers to run the command for
+  -n, --non-specified        Run all non-specified managers
+  -h, --help                 Print help
+  -V, --version              Print version
+```
