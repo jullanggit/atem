@@ -44,25 +44,26 @@ Can be found in [atem-managers](https://github.com/jullanggit/atem-managers)
 
 ## File structure
 ```
-configs/
-├── common.toml
-└── rust.toml
-machines/
-├── laptop.toml
-└── pc.toml
-managers/
-├── cargo.toml
-├── files.toml
-├── rustup_component.toml
-├── rustup_toolchain.toml
-├── service.toml
-├── service_startup.toml
-└── pacman.toml
-files/
-├── common/
-├── laptop/
-├── pc/
-manager_order
+~/.config/atem/
+├── configs/
+│   ├── common.toml
+│   └── rust.toml
+├── machines/
+│   ├── laptop.toml
+│   └── pc.toml
+├── managers/
+│   ├── cargo.toml
+│   ├── files.toml
+│   ├── rustup_component.toml
+│   ├── rustup_toolchain.toml
+│   ├── service.toml
+│   ├── service_startup.toml
+│   └── pacman.toml
+├── files/
+│   ├── common/
+│   ├── laptop/
+│   ├── pc/
+└── manager_order
 ```
 
 ## Naming
