@@ -1,1 +1,2 @@
 - Expose commands
+- Add list command
