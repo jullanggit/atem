@@ -1,8 +1,9 @@
 [package]
 name = "atem"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 description = "A meta package manager"
+authors = ["Jul Lang <jullanggit@proton.me>"]
 repository = "https://github.com/jullanggit/atem"
 readme = "README.md"
 license = "MIT"
