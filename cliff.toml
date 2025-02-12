@@ -16,12 +16,18 @@ body = """
     ## Unreleased
 {% endif %}\
 {% for group, commits in commits | group_by(attribute="group") %}
-    ### {{ group | upper_first }}
-    {% for group, commits in commits | group_by(attribute="scope") %}
-        #### {{ group | upper_first }}
+    ### {{ group }}\
+    {% for scope, commits in commits | group_by(attribute="scope") %}
+        {% if scope %}\
+        #### {{ scope }}
+        {% endif %}\
         {% for commit in commits %}
-            - {{ commit.message | replace(from=commit.group ~ ": ", to="") }}
-        {% endfor %}
+            {% if scope %}\
+                - {{ commit.message | replace(from=commit.group ~ "(" ~ commit.scope ~ ")" ~": ", to="") }}
+            {% else %}\
+                - {{ commit.message | replace(from=commit.group ~ ": ", to="") }}
+            {% endif %}\
+        {% endfor %}\
     {% endfor %}\
 {% endfor %}\n
 """
@@ -35,18 +41,13 @@ trim = true
 [git]
 # parse the commits based on https://www.conventionalcommits.org
 conventional_commits = false
-# filter out the commits that are not conventional
-filter_unconventional = true
-# process each line of a commit as an individual commit
-split_commits = false
-# regex for parsing and grouping commits
 commit_parsers = [
-  { message = "^(\\S+):\\s*(.*)$", group = "${1}", scope = "${1}" },
-  { message = "^[^:]+$", group = "Other" },
-]
+  { message = "^([^(:]+)(?:\\(([^)]+)\\))?:\\s*", group = "${1}", scope = "${2}" },
+  { message = "^[^:]+$", group = "Other", scope = "" },
+] # regex for parsing and grouping commitssplit_commits = false# process each line of a commit as an individual commitfilter_unconventional = false# filter out the commits that are not conventional
 # filter out the commits that are not matched by commit parsers
 filter_commits = false
 # sort the tags topologically
 topo_order = false
 # sort the commits inside sections by oldest/newest order
-sort_commits = "oldest"
+sort_commits = "newest"
