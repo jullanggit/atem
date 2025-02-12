@@ -20,6 +20,8 @@ pub enum Commands {
     Build,
     /// Print the difference between the system and the config
     Diff,
+    /// Prints the currently active system config
+    List,
     /// Upgrade all managers
     Upgrade,
 }

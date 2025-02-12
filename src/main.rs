@@ -9,7 +9,7 @@ use anyhow::{Context as _, anyhow};
 use clap::Parser as _;
 use cli::{
     Cli,
-    Commands::{Build, Diff, Upgrade},
+    Commands::{Build, Diff, List, Upgrade},
 };
 use colored::Colorize as _;
 use serde::Deserialize;
@@ -62,8 +62,30 @@ fn main() -> anyhow::Result<()> {
     let mut managers =
         load_managers(cli.managers, cli.non_specified).context("Failed to load managers")?;
     match cli.command {
-        Build | Diff => {
+        Build | Diff | List => {
             load_configs(&mut managers).context("Failed to load configs")?;
+
+            if cli.command == List {
+                for manager in managers {
+                    // Get system items
+                    let system_items = system_items(&manager).with_context(|| {
+                        format!("Failed to get system items for manager '{}'", manager.name)
+                    })?;
+
+                    if !system_items.is_empty() {
+                        // Print manager name
+                        println!("{}:", manager.name.bold());
+
+                        // Print items
+                        for item in system_items {
+                            println!("{item}");
+                        }
+                        println!();
+                    }
+                }
+                // Return early
+                return Ok(());
+            }
 
             compute_add_remove(&mut managers).context("Failed to compute add/remove")?;
 
@@ -226,26 +248,7 @@ fn load_configs(managers: &mut [Manager]) -> anyhow::Result<()> {
 fn compute_add_remove(managers: &mut [Manager]) -> anyhow::Result<()> {
     for manager in managers {
         // Get system items
-        let items_separator = manager.items_separator.as_deref().unwrap_or(" ");
-        let outputs: Vec<String> = fmt_command(
-            &manager.list,
-            manager.items.iter().map(String::as_str),
-            items_separator,
-            true,
-        )?
-        .into_iter()
-        .map(run_command_with_output)
-        .try_collect()?;
-
-        // Cant get this to work without collecting first
-        let system_items_string: String =
-            outputs.into_iter().intersperse("\n".to_owned()).collect();
-
-        let system_items = system_items_string
-            .split('\n')
-            .filter(|item| !item.is_empty())
-            .map(str::to_string)
-            .collect();
+        let system_items = system_items(manager)?;
 
         manager.items_to_add = manager
             .items
@@ -258,6 +261,29 @@ fn compute_add_remove(managers: &mut [Manager]) -> anyhow::Result<()> {
             .collect();
     }
     Ok(())
+}
+
+/// Gets the list of items on the system
+fn system_items(manager: &Manager) -> Result<HashSet<String>, anyhow::Error> {
+    let items_separator = manager.items_separator.as_deref().unwrap_or(" ");
+    let outputs: Vec<String> = fmt_command(
+        &manager.list,
+        manager.items.iter().map(String::as_str),
+        items_separator,
+        true,
+    )?
+    .into_iter()
+    .map(run_command_with_output)
+    .try_collect()?;
+
+    // Cant get this to work without collecting first
+    let system_items_string: String = outputs.into_iter().intersperse("\n".to_owned()).collect();
+
+    Ok(system_items_string
+        .split('\n')
+        .filter(|item| !item.is_empty())
+        .map(str::to_string)
+        .collect())
 }
 
 /// Prints all items to remove/add
