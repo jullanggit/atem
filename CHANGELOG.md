@@ -8,6 +8,16 @@ All notable changes to this project will be documented in this file.
 
 - initial changelog
 
+### Feature
+
+- add list command
+
+### cargo-release
+
+- add commit/tag message overrides
+
+- add git-cliff pre-release hook
+
 ### git-cliff
 
 - remove timestamp from version header
