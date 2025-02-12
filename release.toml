@@ -1,4 +1,11 @@
-pre-release-hook = ["git", "cliff", "-o", "CHANGELOG.md"]
+pre-release-hook = [
+  "git",
+  "cliff",
+  "-o",
+  "CHANGELOG.md",
+  "--tag",
+  "{{version}}",
+]
 
 pre-release-commit-message = "Release"
 tag-message = "Release {{crate_name}} version {{version}}"
