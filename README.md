@@ -4,7 +4,9 @@ A meta package manager inspired by [rebos](https://gitlab.com/Oglo12/rebos)
 Mostly made for the same reasons as [rebos](https://gitlab.com/Oglo12/rebos), but with a different approach to determining the system's state:
 Atem has no generation tracking. Instead system state is determined using each managers 'list' command.
 This solves one of the main problems I've had when using rebos: the 'built' generation and the actual system getting out of sync.
-While this does increase the burden the individual managers have to bear, [all of the ones I personally use](https://github.com/jullanggit/atem-managers) already have a built-in way to get their items
+While this does increase the burden the individual managers have to bear, [all of the ones I personally use](https://github.com/jullanggit/atem-configs) already have a built-in way to get their items
+
+See [my atem configs](https://github.com/jullanggit/atem-configs) for a reference config
 
 ## Naming
 - Meta backwards is atem
@@ -37,7 +39,7 @@ While this does increase the burden the individual managers have to bear, [all o
 - remove_then_add: first remove then add items
 - items_separator: The separator to use when filling in the <items> in format commands. Defaults to space
 ### Implemented Managers
-Can be found in [atem-managers](https://github.com/jullanggit/atem-managers)
+Can be found in [my atem configs](https://github.com/jullanggit/atem-configs)
 
 ## Configs
 - Each machine has a "root" config file, found at machines/{machine name}.toml
