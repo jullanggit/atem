@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.2.1
+
+### README
+
+- atem-managers -> atem-configs
+
+### TODO
+
+- remove 'list command'
+
+### fix
+#### CHANGELOG
+
+- unreleased -> 0.2.0
+
+#### cargo-release
+
+- fix changelog command
+
 ## 0.2.0
 
 ### CHANGELOG
@@ -11,6 +30,10 @@ All notable changes to this project will be documented in this file.
 ### Feature
 
 - add list command
+
+### Other
+
+- Release
 
 ### cargo-release
 

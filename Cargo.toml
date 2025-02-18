@@ -1,6 +1,6 @@
 [package]
 name = "atem"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2024"
 description = "A meta package manager"
 authors = ["Jul Lang <jullanggit@proton.me>"]
