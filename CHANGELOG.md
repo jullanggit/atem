@@ -2,7 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.2.2
+
+### README
+
+- add ideas, bugs etc. section
+
 ## 0.2.1
+
+### Other
+
+- Release
 
 ### README
 
