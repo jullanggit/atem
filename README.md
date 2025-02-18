@@ -12,6 +12,9 @@ See [my atem configs](https://github.com/jullanggit/atem-configs) for a referenc
 - Meta backwards is atem
 - Also atem is breath in german, and i like the idea that it breathes life into your system
 
+## Ideas, contributing, bugs etc
+- Atem is still very much under active development, so if you have any ideas / feature requests or encounter any bugs, please open an issue or a PR
+
 ## Features
   - Managers
     - User-defined
