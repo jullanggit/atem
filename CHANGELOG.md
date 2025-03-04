@@ -2,7 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.2.3
+
+### fix
+
+- add missing format in error message
+
+### github
+
+- add release workflow
+
 ## 0.2.2
+
+### Other
+
+- Release
 
 ### README
 
