@@ -196,8 +196,8 @@ fn load_configs(managers: &mut [Manager]) -> anyhow::Result<()> {
         let config_file = format!("{}/configs/{config_file}.toml", config_path()?);
 
         // Load the config file
-        let config_string = fs::read_to_string(config_file)
-            .with_context(|| "Failed to read config file '{config_file}'")?;
+        let config_string = fs::read_to_string(&config_file)
+            .with_context(|| format!("Failed to read config file '{config_file}'"))?;
 
         // Deserialize it
         let config_table: Table = toml::from_str(&config_string)
