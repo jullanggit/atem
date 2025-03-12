@@ -2,7 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.2.4
+
+### Other
+
+- fix(error_message) add missing format!()
+
 ## 0.2.3
+
+### Other
+
+- Release
 
 ### fix
 
