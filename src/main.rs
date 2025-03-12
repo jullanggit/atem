@@ -201,7 +201,7 @@ fn load_configs(managers: &mut [Manager]) -> anyhow::Result<()> {
 
         // Deserialize it
         let config_table: Table = toml::from_str(&config_string)
-            .with_context(|| "Failed to deserialize config '{config_file}'")?;
+            .with_context(|| format!("Failed to deserialize config '{config_file}'"))?;
 
         for (manager_name, value) in config_table {
             // Create an iterator over the items of the entry
