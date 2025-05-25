@@ -94,3 +94,4 @@ Options:
   -h, --help                 Print help
   -V, --version              Print version
 ```
+![brainmademark](https://brainmade.org/black-logo.svg)
