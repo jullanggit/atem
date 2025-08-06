@@ -94,4 +94,7 @@ Options:
   -h, --help                 Print help
   -V, --version              Print version
 ```
+## TODO
+- add install-manager: optionally run a script to install the manager
+
 ![brainmademark](https://brainmade.org/black-logo.svg)
