@@ -1,6 +1,4 @@
-#![feature(strict_overflow_ops)]
 #![feature(iterator_try_collect)]
-#![feature(let_chains)]
 #![feature(iter_intersperse)]
 
 mod cli;
