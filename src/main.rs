@@ -74,8 +74,12 @@ fn main() -> anyhow::Result<()> {
                         // Print manager name
                         println!("{}:", manager.name.bold());
 
+                        // sort items
+                        let mut items: Vec<_> = system_items.into_iter().collect();
+                        items.sort_unstable();
+
                         // Print items
-                        for item in system_items {
+                        for item in items {
                             println!("{item}");
                         }
                         println!();
@@ -253,10 +257,13 @@ fn compute_add_remove(managers: &mut [Manager]) -> anyhow::Result<()> {
             .difference(&system_items)
             .map(Clone::clone)
             .collect();
+        manager.items_to_add.sort_unstable();
+
         manager.items_to_remove = system_items
             .difference(&manager.items)
             .map(Clone::clone)
             .collect();
+        manager.items_to_remove.sort_unstable();
     }
     Ok(())
 }
