@@ -2,9 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.2.5
+
+### Feature
+
+- sort items
+
+### Other
+
+- update dependencies
+
+- add TODO
+
+- add brainmademark
+
 ## 0.2.4
 
 ### Other
+
+- Release
 
 - fix(error_message) add missing format!()
 
