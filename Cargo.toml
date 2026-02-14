@@ -15,7 +15,7 @@ anyhow = "1.0.100"
 clap = { version = "4.5.49", features = ["derive"] }
 colored = "3.0.0"
 serde = { version = "1.0.228", features = ["derive"] }
-toml = { version = "0.9.8", default-features = false, features = [
+toml = { version = "1.0.1", default-features = false, features = [
   "parse",
   "serde",
   "std",
