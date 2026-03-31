@@ -6,7 +6,7 @@ description = "A meta package manager"
 authors = ["Jul Lang <jullanggit@proton.me>"]
 repository = "https://github.com/jullanggit/atem"
 readme = "README.md"
-license = "MIT"
+license = "AGPL-3.0"
 categories = ["command-line-utilities", "config"]
 keywords = ["package-manager", "linux-distro", "system", "repeatability"]
 
