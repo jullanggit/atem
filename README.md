@@ -13,7 +13,7 @@ See [my atem configs](https://github.com/jullanggit/atem-configs) for a referenc
 - Also atem is breath in german, and i like the idea that it breathes life into your system
 
 ## Maintenance
-I am no longer actively using, and thus working on, atem as I, somewhat ironically, have switched to nixos (can recommend :)).
+I am no longer actively using, and thus working on atem as I (somewhat ironically) have switched to nixos (can recommend :)).
 PR's are still welcome.
 
 ## Features
